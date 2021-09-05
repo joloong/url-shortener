@@ -87,4 +87,5 @@ def original_handler(short_url):
     return redirect(original_url, code=302) 
 
 if __name__ == '__main__':
-    app.run()
+    port = Config.PORT
+    app.run(host='0.0.0.0', port=port)
