@@ -1,6 +1,8 @@
 from models import db
 from models.UrlModel import UrlModel
 
+from exceptions.InvalidShortUrlError import InvalidShortUrlError
+
 
 def get_original_from_short_url(short_url: str) -> str:
     result = db.session.query(UrlModel).filter(
@@ -24,7 +26,7 @@ def get_short_from_original_url(original_url: str) -> str:
 
 def add_url(short_url: str, original_url: str) -> str:
     if get_original_from_short_url(short_url):
-        raise Exception(f"short_url ({short_url}) is already taken!")
+        raise InvalidShortUrlError(short_url)
 
     existing_short_url = get_short_from_original_url(original_url)
     if existing_short_url:

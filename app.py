@@ -7,6 +7,7 @@ import string
 import random
 
 from exceptions.MissingKeyError import MissingKeyError
+from exceptions.InvalidShortUrlError import InvalidShortUrlError
 from config import Config
 from models import db, UrlModel
 from services import UrlService
@@ -45,12 +46,21 @@ def is_original_url_valid(original_url):
 
     return is_valid
 
+def add_original_url(original_url):
+    while True:
+        try:
+            short_url = short_url_generator()
+            UrlService.add_url(short_url, original_url)
+            return short_url
+        except InvalidShortUrlError:
+            continue
 
 @ app.route("/", methods=["GET", "POST"])
 def root_handler():
     if request.method == "GET":
         return render_template("index.html")
 
+    # Create short url
     data = request.get_json() or request.form
     original_url = custom_dict_get(data, "url")
     if not is_original_url_valid(original_url):
@@ -58,8 +68,7 @@ def root_handler():
 
     short_url = UrlService.get_short_from_original_url(original_url)
     if not short_url:
-        short_url = short_url_generator()
-        UrlService.add_url(short_url, original_url)
+        short_url = add_original_url(original_url)
 
     return {
         "short_url": f"{request.base_url}{short_url}"
