@@ -1,4 +1,4 @@
-from flask import Flask, request, redirect
+from flask import Flask, request, redirect, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 
@@ -46,26 +46,12 @@ def is_original_url_valid(original_url):
     return is_valid
 
 
-@ app.route("/")
-def hello():
-    return "Welcome to URL Shortener!"
+@ app.route("/", methods=["GET", "POST"])
+def root_handler():
+    if request.method == "GET":
+        return render_template("index.html")
 
-
-@ app.route("/short/<short_url>", methods=["GET"])
-def original_handler(short_url):
-    if len(short_url) != 6:
-        return {"status": "incorrect short url length"}, 404
-
-    original_url = UrlService.get_original_from_short_url(short_url)
-    if not original_url:
-        return {"status": "missing original url"}, 404
-
-    return redirect(original_url, code=302)
-
-
-@ app.route("/short", methods=["POST"])
-def short_handler():
-    data = request.get_json()
+    data = request.get_json() or request.form
     original_url = custom_dict_get(data, "url")
     if not is_original_url_valid(original_url):
         return {"status": "invalid original url"}, 404
@@ -75,8 +61,21 @@ def short_handler():
         short_url = short_url_generator()
         UrlService.add_url(short_url, original_url)
 
-    return short_url
+    return {
+        "short_url": f"{request.base_url}{short_url}"
+    }
 
+
+@ app.route("/<short_url>", methods=["GET"])
+def original_handler(short_url):
+    if len(short_url) != 6:
+        return {"status": "incorrect short url length"}, 404
+
+    original_url = UrlService.get_original_from_short_url(short_url)
+    if not original_url:
+        return {"status": "missing original url"}, 404
+
+    return redirect(original_url, code=302) 
 
 if __name__ == '__main__':
     app.run()
