@@ -62,7 +62,11 @@ def root_handler():
 
     # Create short url
     data = request.get_json() or request.form
-    original_url = custom_dict_get(data, "url")
+    try:
+        original_url = custom_dict_get(data, "url")
+    except MissingKeyError:
+        return {"status": "missing original url"}, 404
+
     if not is_original_url_valid(original_url):
         return {"status": "invalid original url"}, 404
 
