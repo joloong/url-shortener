@@ -11,8 +11,8 @@ You can try out the URL Shortener at https://joelloong.com.
 Some example URLs you can try to shorten:
 
     - https://joelloong.com
+    - https://github.com/joloong/url-shortener
     - https://www.google.com
-    - https://www.github.com
 
 ## Development
 
@@ -24,10 +24,11 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Starting Database
+Setting Up Database
 
 ```
-TBA
+flask db migrate
+flask db upgrade
 ```
 
 Creating .env in root folder
@@ -36,7 +37,7 @@ Creating .env in root folder
 echo DATABASE_URL=<your-database-url> > .env
 ```
 
-Starting Up Server
+Starting Up Development Server
 
 ```
 FLASK_APP=app.py FLASK_ENV=development flask run
